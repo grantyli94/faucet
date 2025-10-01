@@ -48,11 +48,6 @@ A simple, modern faucet application for distributing Sepolia testnet ETH to deve
 
 4. **Open your browser** to `http://localhost:3000`
 
-## Documentation
-
-- **[Setup Guide](SETUP.md)** - Detailed setup instructions
-- **[Requirements](REQUIREMENTS.md)** - Technical requirements and dependencies
-
 ## What You Need
 
 ### Before Starting

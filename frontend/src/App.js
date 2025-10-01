@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import './App.css';
+import FaucetInfo from './components/FaucetInfo';
+import FaucetForm from './components/FaucetForm';
+import Info from './components/Info';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -96,9 +99,6 @@ function App() {
     }
   };
 
-  const getExplorerUrl = (txHash) => {
-    return `https://sepolia.etherscan.io/tx/${txHash}`;
-  };
 
   return (
     <div className="App">
@@ -108,102 +108,20 @@ function App() {
       </header>
 
       <main className="App-main">
-        {faucetInfo && (
-          <div className="faucet-info">
-            <h3>Faucet Information</h3>
-            <div className="info-grid">
-              <div className="info-item">
-                <span className="label">Network:</span>
-                <span className="value">{faucetInfo.network.name} (Chain ID: {faucetInfo.network.chainId})</span>
-              </div>
-              <div className="info-item">
-                <span className="label">Faucet Balance:</span>
-                <span className="value">{parseFloat(faucetInfo.faucetBalance).toFixed(4)} ETH</span>
-              </div>
-              <div className="info-item">
-                <span className="label">Amount per request:</span>
-                <span className="value">{faucetInfo.faucetAmount} ETH</span>
-              </div>
-              <div className="info-item">
-                <span className="label">Faucet Address:</span>
-                <span className="value address">{faucetInfo.faucetAddress}</span>
-              </div>
-            </div>
-          </div>
-        )}
+        <FaucetInfo faucetInfo={faucetInfo} />
+        
+        <FaucetForm 
+          address={address}
+          loading={loading}
+          message={message}
+          messageType={messageType}
+          transactionHash={transactionHash}
+          faucetInfo={faucetInfo}
+          onAddressChange={handleAddressChange}
+          onSubmit={handleSubmit}
+        />
 
-        <div className="faucet-form">
-          <h2>Request Testnet ETH</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <label htmlFor="address">Ethereum Address:</label>
-              <input
-                type="text"
-                id="address"
-                value={address}
-                onChange={handleAddressChange}
-                placeholder="0x..."
-                disabled={loading}
-                className={messageType === 'error' && !loading ? 'error' : ''}
-              />
-            </div>
-            
-            <button 
-              type="submit" 
-              disabled={loading || !address.trim()}
-              className="submit-button"
-            >
-              {loading ? 'Sending...' : `Request ${faucetInfo?.faucetAmount || '0.1'} ETH`}
-            </button>
-          </form>
-
-          {message && (
-            <div className={`message ${messageType}`}>
-              {message}
-            </div>
-          )}
-
-          {transactionHash && (
-            <div className="transaction-info">
-              <h3>Transaction Details</h3>
-              <div className="transaction-hash">
-                <span className="label">Transaction Hash:</span>
-                <a 
-                  href={getExplorerUrl(transactionHash)} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="tx-link"
-                >
-                  {transactionHash}
-                </a>
-              </div>
-              <p className="explorer-note">
-                Click the transaction hash to view on Etherscan
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="instructions">
-          <h3>Instructions</h3>
-          <ol>
-            <li>Make sure you have MetaMask or another Ethereum wallet installed</li>
-            <li>Switch your wallet to the Sepolia testnet</li>
-            <li>Copy your wallet address and paste it above</li>
-            <li>Click "Request ETH" to receive testnet funds</li>
-            <li>You can request funds once every 24 hours per address</li>
-          </ol>
-        </div>
-
-        <div className="warning">
-          <h4>⚠️ Important Notes</h4>
-          <ul>
-            <li>This faucet only works on the Sepolia testnet</li>
-            <li>Testnet ETH has no real value and cannot be used on mainnet</li>
-            <li>Rate limiting: 1 request per address per 24 hours</li>
-            <li>If you need more testnet ETH, try other public faucets</li>
-          </ul>
-        </div>
+        <Info />
       </main>
 
       <footer className="App-footer">

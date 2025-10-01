@@ -59,10 +59,6 @@ function updateRateLimit(address) {
 }
 
 // Routes
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Faucet server is running' });
-});
-
 app.get('/api/faucet/info', async (req, res) => {
   try {
     const balance = await provider.getBalance(wallet.address);
@@ -107,12 +103,12 @@ app.post('/api/faucet', async (req, res) => {
     }
 
     // Check rate limiting
-    // if (isRateLimited(address)) {
-    //   return res.status(429).json({ 
-    //     success: false, 
-    //     error: 'Rate limit exceeded. Please try again in 24 hours.' 
-    //   });
-    // }
+    if (isRateLimited(address)) {
+      return res.status(429).json({ 
+        success: false, 
+        error: 'Rate limit exceeded. Please try again in 24 hours.' 
+      });
+    }
 
     // Check faucet balance
     const faucetBalance = await provider.getBalance(wallet.address);

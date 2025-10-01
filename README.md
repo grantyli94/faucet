@@ -4,19 +4,17 @@ A simple, modern faucet application for distributing Sepolia testnet ETH to deve
 
 ## Features
 
-- **Clean, modern UI** - Beautiful React frontend with responsive design
 - **Rate limiting** - Prevents abuse with 24-hour cooldown per address
 - **Address validation** - Validates Ethereum addresses before processing
 - **Transaction tracking** - View transactions on Etherscan
 - **Real-time balance** - Shows current faucet balance and configuration
-- **Error handling** - Comprehensive error messages and user feedback
 
 ## Architecture
 
-- **Frontend**: React application with modern UI/UX
+- **Frontend**: React application
 - **Backend**: Node.js/Express API server
 - **Blockchain**: Ethereum Sepolia testnet via ethers.js
-- **Rate Limiting**: In-memory storage (easily extensible to Redis/DB)
+- **Rate Limiting**: In-memory storage
 
 ## Quick Start
 
@@ -58,7 +56,7 @@ A simple, modern faucet application for distributing Sepolia testnet ETH to deve
 ## What You Need
 
 ### Before Starting
-- Node.js v14+ installed
+- Node.js v18+ installed
 - MetaMask or Coinbase Wallet browser extension
 - Sepolia RPC endpoint (Alchemy/Infura)
 - Sepolia testnet ETH for the faucet wallet
@@ -80,27 +78,8 @@ REACT_APP_API_BASE_URL=http://localhost:3001
 
 ## API Endpoints
 
-- `GET /health` - Health check
 - `GET /api/faucet/info` - Faucet information and balance
 - `POST /api/faucet` - Request testnet ETH
-
-## Security Features
-
-- ✅ Address validation
-- ✅ Rate limiting (1 request per address per 24 hours)
-- ✅ Input sanitization
-- ✅ Error handling
-- ✅ Private key protection via environment variables
-
-## Screenshots
-
-The application features:
-- Modern gradient design with glassmorphism effects
-- Responsive layout for mobile and desktop
-- Real-time faucet balance display
-- Transaction hash links to Etherscan
-- Clear instructions and warnings
-- Professional error handling
 
 ## Development
 
@@ -151,20 +130,3 @@ For production deployment:
 - Set up HTTPS and proper CORS policies
 - Use secret management for private keys
 - Add transaction history tracking
-
-## Contributing
-
-This is a simple educational project. Feel free to fork and enhance with additional features like:
-- Database integration
-- Advanced rate limiting
-- Transaction history
-- Admin dashboard
-- Multiple token support
-
-## License
-
-MIT License - feel free to use this code for your own projects.
-
----
-
-**⚠️ Important**: This faucet is for Sepolia testnet only. Testnet ETH has no real value and cannot be used on Ethereum mainnet.

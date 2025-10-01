@@ -116,12 +116,3 @@ faucet/
 4. **Rate limiting**
    - Wait 24 hours or use a different address
    - Restart backend to clear in-memory limits (development only)
-
-## Production Considerations
-
-For production deployment:
-- Use Redis/database for rate limiting persistence
-- Implement proper logging and monitoring
-- Set up HTTPS and proper CORS policies
-- Use secret management for private keys
-- Add transaction history tracking

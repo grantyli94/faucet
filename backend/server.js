@@ -1,14 +1,13 @@
 const express = require('express');
-const cors = require('cors');
 const { ethers } = require('ethers');
+const { applyMiddleware, applyErrorHandling, updateRateLimit } = require('./middleware');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Apply middleware
+applyMiddleware(app);
 
 // Environment variables validation
 const requiredEnvVars = ['ETHEREUM_PRIVATE_KEY', 'SEPOLIA_RPC_URL'];
@@ -25,12 +24,8 @@ const provider = new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL);
 const wallet = new ethers.Wallet(process.env.ETHEREUM_PRIVATE_KEY, provider);
 
 // Faucet configuration
-const FAUCET_AMOUNT = process.env.FAUCET_AMOUNT || '0.01'; // Default 0.1 ETH
+const FAUCET_AMOUNT = process.env.FAUCET_AMOUNT || '0.01'; // Default 0.01 ETH
 const faucetAmountWei = ethers.parseEther(FAUCET_AMOUNT);
-
-// Rate limiting storage (in production, use Redis or database)
-const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Helper function to validate Ethereum address
 function isValidEthereumAddress(address) {
@@ -39,23 +34,6 @@ function isValidEthereumAddress(address) {
   } catch (error) {
     return false;
   }
-}
-
-// Helper function to check rate limiting
-function isRateLimited(address) {
-  const now = Date.now();
-  const lastRequest = rateLimitMap.get(address.toLowerCase());
-  
-  if (lastRequest && (now - lastRequest) < RATE_LIMIT_WINDOW) {
-    return true;
-  }
-  
-  return false;
-}
-
-// Helper function to update rate limiting
-function updateRateLimit(address) {
-  rateLimitMap.set(address.toLowerCase(), Date.now());
 }
 
 // Routes
@@ -102,20 +80,22 @@ app.post('/api/faucet', async (req, res) => {
       });
     }
 
-    // Check rate limiting
-    if (isRateLimited(address)) {
-      return res.status(429).json({ 
-        success: false, 
-        error: 'Rate limit exceeded. Please try again in 24 hours.' 
-      });
-    }
+    // Rate limiting is now handled by middleware
 
     // Check faucet balance
     const faucetBalance = await provider.getBalance(wallet.address);
-    if (faucetBalance < faucetAmountWei) {
+    // Estimate gas cost for the transaction
+    const feeData = await provider.getFeeData();
+    const gasLimit = 21000n; // Use BigInt literal
+    const gasPrice = feeData.gasPrice || feeData.maxFeePerGas || ethers.parseUnits('20', 'gwei'); // Fallback gas price
+    const estimatedGasCost = gasLimit * gasPrice;
+    
+    const totalRequired = faucetAmountWei + estimatedGasCost;
+
+    if (faucetBalance < totalRequired) {
       return res.status(503).json({ 
         success: false, 
-        error: 'Insufficient faucet balance' 
+        error: `Insufficient faucet balance. Required: ${ethers.formatEther(totalRequired)} ETH (${FAUCET_AMOUNT} ETH + gas fees), Available: ${ethers.formatEther(faucetBalance)} ETH` 
       });
     }
 
@@ -169,22 +149,8 @@ app.post('/api/faucet', async (req, res) => {
   }
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ 
-    success: false, 
-    error: 'Internal server error' 
-  });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ 
-    success: false, 
-    error: 'Endpoint not found' 
-  });
-});
+// Apply error handling middleware
+applyErrorHandling(app);
 
 app.listen(PORT, () => {
   console.log(`Faucet server running on port ${PORT}`);
